@@ -13,8 +13,10 @@ const getState = ({ getStore, getActions, setStore }) => {
 					background: "white",
 					initial: "white"
 				}
-			]
+			],
+			token: localStorage.getItem("token") || null
 		},
+		
 		actions: {
 			// Use getActions to call a function within a fuction
 			exampleFunction: () => {
@@ -46,6 +48,51 @@ const getState = ({ getStore, getActions, setStore }) => {
 
 				//reset the global store
 				setStore({ demo: demo });
+			},
+			register: async (user) => {
+				try {
+					let response = await fetch(`${process.env.BACKEND_URL}/api/register`, 
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify(user)
+						}
+					)	
+					return response.status
+				} catch (error) {
+					console.log(error)
+					return false
+				}
+			},
+			login: async (user) => {
+				try {
+					let response = await fetch(`${process.env.BACKEND_URL}/api/login`,
+						{
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json"
+							},
+							body: JSON.stringify(user)
+						}
+					)
+					let data = await response.json()
+					if (response.ok) {
+						setStore({
+							token: data.token
+						})
+						localStorage.setItem("token", data.token)
+					}
+					return response.status
+				}
+				catch(error) {
+					console.log(error)
+					return false
+				}
+			},
+			logout: () => {
+				setStore({token: null})
 			}
 		}
 	};
